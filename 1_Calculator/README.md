@@ -4,5 +4,8 @@
 
 계산기의 주요기능을 담고 예외처리를 하며 Kotlin을 공부하고 적응하기 위한 프로젝트이다.
 
+---
 
+윈도우 계산기를 모티브로 제작하였다. (아래 사진은 ver1 과 윈도우 계산기)
 
+![버전 1과 윈도우 계산기](C:\Users\cjs60\AppData\Roaming\Typora\typora-user-images\1576938503298.png)
