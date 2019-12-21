@@ -1,6 +1,6 @@
 ## Kotlin Study:green_book:
 
-![imge](https://img.shields.io/badge/ProjectType-SingleStudy-green)![imge](https://img.shields.io/badge/Language-Kotlin-yellow)![imge](https://img.shields.io/badge/Tools-AndroidStudio-blue)
+![imge](https://img.shields.io/badge/ProjectType-SingleStudy-green)  ![imge](https://img.shields.io/badge/Language-Kotlin-yellow)  ![imge](https://img.shields.io/badge/Tools-AndroidStudio-blue)
 
 안드로이드 개발자로서 더욱 더 성장하기 위해 Kotlin 언어 공부를 시작합니다.
 
@@ -23,13 +23,13 @@
 
   ```java
   private String getSelectedDealerName(@Nullable Car car) { 
-  if (car == null) { return null; } 
-  Auction auction = car.getAuction(); 
-  if (auction == null) { return null; } 
-  Bid selectedBid = auction.getSelectedBid(); 
-  if (selectedBid == null) { return null; } 
-  Dealer dealer = selectedBid.getDealer(); 
-  if (dealer == null) { return null; } return dealer.getName(); 
+  	if (car == null) { return null; } 
+  	Auction auction = car.getAuction(); 
+  	if (auction == null) { return null; } 
+  	Bid selectedBid = auction.getSelectedBid(); 
+  	if (selectedBid == null) { return null; } 
+  	Dealer dealer = selectedBid.getDealer(); 
+  	if (dealer == null) { return null; } return dealer.getName(); 
   }
   ```
 
@@ -37,7 +37,7 @@
 
   ~~~kotlin
   private fun getSelectedDealerName(car: Car?): String? { 
-  return car?.auction?.selectedBid?.dealer?.name 
+  	return car?.auction?.selectedBid?.dealer?.name 
   }
   ~~~
 
@@ -160,12 +160,192 @@ var로 선언해서 setter/getter가 만들어지고, 물음표를 통해 Nullab
 
 추가로 data Class는 toString(), hashCode(), equlas(), copy()까지 만들어준다... :scream:
 
+#### String template
 
+- 자바에서는 로그를 찍거나 텍스트를 만들때 a + b + c 방식으로 만든다.
+
+  ```java
+  priavet void logUserInfo(@NonNull User user){
+  	String name = user.getName();
+  	String age = user.getAge();
+  	Log.d("UserIndo","UserName : " + name + " ,UserAge : " + age);
+  }
+  ```
+
+- 코틀린은 개선된 방식으로 코드를 작성한다.
+
+  ```kotlin
+  private fun logUserInfo(user: User){
+  	val name = user.name
+  	val age = user.age
+  	Log.d("UserInfo","UserName : $name, UserAge : $age")
+  }
+  ```
+
+  $표시로 바로 변수를 넣어서 사용할 수 있다.
+
+#### Overload
+
+자바는 오버로딩을 지원해서 생성자나 함수를 여러개 만들어야 하는 경우가 있다. 하지만 kotlin이라면 얘기가 다르다.
+
+```kotlin
+class UserCustomView @JvmOverloads constructor(
+	contex: Context,
+	attrs: AttributeSet? = null,
+	defStyleAttr: Int = 0,
+	defStyleRes: Int = 0
+);
+...
+```
+
+= null, = 0 과 같이 만약 해당 값이 없으면 default로 이렇나 값이 지정되도록하면 알아서 오버로딩 생성자가 만들어진다...
+(아직 사전지식임에도 정말 놀랍다...:rofl:)
+
+#### Lambda
+
+버튼 클릭 리스너를 만들때 자바에서는 다음과 같은 코딩을 하게 된다.
+
+```java
+button.setOnClickListener(new View.OnClickListener() { 
+	@Override public void onClick(View view) { 
+		// 동작
+	} 
+}); //길다면 이렇게
+button.setOnClickListener(view ->{
+	//동작
+}); //짧으면 이렇게
+```
+
+이렇게 쓰지않는 view를 연결해주고 자시고 한다. 코틀린은 짧다.
+
+```kotlin
+button.setOnClickListener{
+ //동작
+}
+```
+
+(하.. java하면서 저게 너무 불편했는데 정말 편리한 기능이다.)
+
+#### let
+
+만약 어떠한 정보를 가져와서 null인지 아닌지 체크하고 그 안에 정보를 사용한다면 자바는 다음과 같다.
+
+```java
+private void getUserName(@Nullable User user){
+	if(user != null){
+		String name = user.getName();
+        //동작
+	}
+}
+```
+
+이때 코틀린은 let을 사용한다. ? 로 null을 체크하고 let을 함께 붙여주면 null이 아닐때만 코드가 동작한다.
+
+```kotlin
+private fun getUserName(user: User?){
+	user?.let{ user->
+		val name = user.name
+		//동작
+	}
+    //or
+    user?.let{
+        val name = it.name
+    }
+}
+```
+
+위에서 or 이후 코드처럼 lambda 인자도 없앨 수 있고 들어 오는 값은 it으로 사용할 수 있다.
+
+#### let + run
+
+만약 어떠한 정보를 가져오는데 문제가 발생해서 log를 남겨두고 싶다면 자바는 이렇게 코딩할 것이다.
+
+```java
+private void setUser(@Nullable User user) { 
+	if (user != null && user.getName() != null) {
+    	String name = user.getName(); 
+    	// 동작
+    } else { 
+    	// 로그
+    } 
+}
+```
+
+코틀린은 let과 elvis 오퍼레이터와 run을 이용해 다음과 같이 만들 수 있다.
+
+```kotlin
+private fun setUser(user: User?){
+	user?.name?.let{ //user를 확인하고 체인 해서 name을 확인한다.
+		//동작
+	} ?: run{
+		//로그
+	}
+}
+```
+
+하지만 위 방식은 let에서 결과가 null이면 run으로 빠지게 되는데 보통은 let에서 그런경우는 없다고 한다.
+
+#### apply
+
+이번에는 새로 VO 객체를 만들고 설정하는 방법이다. 자바는 이렇다.
+
+```java
+User user = new User(); //여기서 생성자로 넣을 수 도 있음
+user.setName("홍길동");
+user.setAge("25");
+user.setAddress("서울시 양천구");
+```
+
+위와 같은 기능의 코틀린 코드는 다음과 같다.
+
+```kotlin
+val user = User().apply{
+	name = "홍길동"
+	age = "25"
+	address = "서울시 양천구"
+}
+```
+
+보통은 이렇게 객체를 생성할때 쓰기도 하지만 안드로이드에서 Activity 실행을 위해 intent를 만들고 여러 값을 Extra로 넘기는 함수를 사용할때도 사용 가능하다.
+
+```kotlin
+private fun getUserActivityIntent() =
+	Intent(this. UserActivity::class.java).apply{
+		putExtra(EXTRA_A,a);
+		putExtra(EXTRA_B,b);
+		putExtra(EXTRA_C,c);
+	}
+```
+
+#### run
+
+아까 나왔던 run은 다음처럼 사용할 수 있다.
+
+```kotlin
+private fun initRecyclerView() { 
+	binding.recyclerView.run { 
+		adapter = recyclerViewAdapter
+		layoutManager = GridLayoutManager(context, SPAN_COUNT)
+		addItemDecoration(DividerItemDecoration(context,LinearLayout.VERTICAL)) 
+		isNestedScrollingEnabled = false 
+	} 
+}
+```
+
+여기서 만약 run을 사용하지 않았다면 binding.recyclerview.xxxx를 계속 쳐줘야 했다.
+
+### apply / also / run / let / with 의 차이
+
+![img](https://k.kakaocdn.net/dn/nf1nj/btqviF0WrxB/Eq605A7Z8UJxIe3zqMeE5K/img.png)
+
+![img](https://k.kakaocdn.net/dn/oquKm/btqvlSxYb1Q/0cioJSk1YnP1lXd7DVZPK0/img.png)
+
+scope에 this가 들어오는지 vs it 이 들어오는지, 결과로 자신이 나가는지 , 마지막 줄이 return 되는지 개념이 다르다.
 
 ---
 
 ### 출처
 
-[kotlin을 왜 쓸까?][https://velog.io/@hyejineeee/-%EC%BD%94%ED%8B%80%EB%A6%B0-kotlin-%EC%9D%80-%EB%AC%B4%EC%97%87]
+[kotlin을 왜 쓸까?](https://velog.io/@hyejineeee/-%EC%BD%94%ED%8B%80%EB%A6%B0-kotlin-%EC%9D%80-%EB%AC%B4%EC%97%87)
 
 [kotlin_사전지식](https://gun0912.tistory.com/81)
