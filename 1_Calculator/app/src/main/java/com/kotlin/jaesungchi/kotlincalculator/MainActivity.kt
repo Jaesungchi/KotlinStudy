@@ -139,9 +139,9 @@ class MainActivity : AppCompatActivity() {
             var limitSize:Int = 1 //어디까지 줄일 수 있는지 확인해줌
             when(operator){
                 Constants.PERCENT -> return //% 인경우
-                Constants.DENOMINATOR -> return //1/x 인 경우
+                Constants.DENOMINATOR -> txt_Result.setText("${ (1 / nowResult).toDouble()}") //1/x 인 경우
                 Constants.SQAURE -> txt_Result.setText("${nowResult * nowResult}")
-                Constants.ROOT ->return
+                Constants.ROOT -> txt_Result.setText("${Math.sqrt(nowResult.toDouble())}")
                 Constants.DEL -> {
                     if(nowResult < 0) //0보다 작은 경우는
                         limitSize++ //-를 지우면 안되기 때문
