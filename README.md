@@ -346,6 +346,99 @@ scope에 this가 들어오는지 vs it 이 들어오는지, 결과로 자신이 
 
 ---
 
+## Kotlin의 기본 문법
+
+### 변수 선언
+
+- 변경 가능한 변수는 var 를 변경이 안되는 변수는 val를 사용해서 선언한다. 또한 따로 자료형을 선언하지 않아도 된다.
+
+  ```kotlin
+  val ABC = 30 //변경이 안되는 변수 final 자료형을 선언하지 않아도 Int로 받음
+  var BCD: Int = 30 //변경이 되는 변수 null값을 받지 않음
+  var CDE: Int? = 30 //변경이 되는 변수 null값을 받음
+  ```
+
+### 함수 선언
+
+- 함수는 fun을 붙여서 선언한다.
+
+  ```kotlin
+  fun function(a: Int, b:String?): Int{
+  	//fun 함수명(변수명: 자료형): 반환자료형
+      //위는 a는 NonNull 이고 b 는 Nullable이다.
+  }
+  ```
+
+### 자료형, 문자열
+
+- 코틀린에서의 문자열은 "" 를 이용하고 문자는 ''를 이용한다. python 처럼 여러줄 로 문장을 표현할 때는 """로 표현한다.
+
+  ```kotlin
+  var data = "최재성" //data : String
+  var dot = '점' //dot :Char
+  var sentence = 
+  """
+  긴문장 표현방법
+  이렇게 하시면 됩니다.
+  """
+  ```
+
+- 문자열 간 비교는 자바와 달리 == 를 사용하면 된다.
+
+  ```Kotlin
+  if(data == "데이터")
+  ```
+
+- 문자 표현방식은 $기호를 붙여서 사용하면 된다. 자바보다 빠르다
+
+  ```kotlin
+  var data = "Hello"
+  println("$data World!")
+  ```
+
+- 배열 선언은 Array를 이용한다. Array를 이용해 자료형을 맞추고 arrayOf()를 이용해 초기화한다.
+
+  ```kotlin
+  var numArr: Array<Int> = arrayOf(0,1,2,3,4,5) //자료형 생략 가능
+  ```
+
+### 제어문( For, while, when)
+
+- for는 배열을 순회하거나 범위 지정을 할 수 있다.
+
+  ```kotlin
+  val numArr = arrayOf(1,2,3,4,5)
+  for(num in numArr){} //배열 순회
+  for(i in 1..3){} //1~3까지 순회
+  for(i in 0..10 step 2){} //0~10 까지 2씩 증가
+  for(i int 10 DownTo 0 step 2){} //10~0 까지 2씩 감소
+  ```
+
+- while은 java와 크게 다르지 않다.
+
+  ```kotlin
+  var i = 0
+  while(i < 10){
+  	i--
+  }
+  ```
+
+- when은 switch를 대신한다.
+
+  ```kotlin
+  when(x){
+  	1 -> println("1") //한개
+  	2, 3 -> println("2 or 3") //여러 값
+  	in 4..7 -> println("4 ~ 7") //범위
+  	!in 8..10 -> printlnf("not 8 ~ 10") // not도 가능하다.
+  	else ->{ //아닌경우
+  		println("else")
+  	}
+  }
+  ```
+
+---
+
 ### 출처
 
 [kotlin을 왜 쓸까?](https://velog.io/@hyejineeee/-%EC%BD%94%ED%8B%80%EB%A6%B0-kotlin-%EC%9D%80-%EB%AC%B4%EC%97%87)
