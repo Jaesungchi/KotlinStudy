@@ -251,6 +251,133 @@ val weight = intent.getIntExtra("weight",0)
 
 //// 추가로 Toast 위젯또한 toast("~~~") 면 끝난다. 개꿀이 아닐 수 없다.
 
+## 3. 날씨 API 사용
+
+날씨 API는 세계날씨 정보를 가져오는 것이기 때문에 https://openweathermap.org/ 를 활용하기 로했다.
+
+예시로 api.openweathermap.org/data/2.5/weather?q="" 여기에 API calls를 하면 된다고 나와있다.
+
+일단 라이브러리를 추가한다.
+
+- retrofit : Retrofit 라이브러리
+- converte-gson : Json 데이터를 파싱하기 위한 라이브러리
+- adapter-rxjava2 : Retrofit을 Rx 형태로 사용하도록 설정해주는 어댑터
+- okhttp,logging-intercepter : Retrofit을 사용해 받는 HTTP데이터를 로그상으로 확인하기 위한 라이브러리
+
+### (1) 데이터 클래스 정의
+
+이후 데이터를 받기 위한 데이터 클래스를 정의한다. (각 항목은 API 반환 데이터에 맞게 구성됨)
+
+```kotlin
+class WeatherModel (){
+    @SerializedName("name")
+    val name: String = ""
+
+    @SerializedName("weather")
+    val weather: List<WeatherData> = listOf()
+
+    @SerializedName("main")
+    val main: MainData? = null
+
+    @SerializedName("visibility")
+    val visibility: String = ""
+
+    @SerializedName("wind")
+    val wind: WindData? = null
+}
+```
+
+### API 클래스 정의
+
+```kotlin
+class WeatherApi{
+
+    interface  WeatherApiImpl{
+        @GET("weather?")
+        fun getWeatherList(@Query("q") query: String,@Query("APPID") APPID: String): Observable<WeatherModel>
+    }
+
+    companion object {
+        fun getWeatherList(query: String): Observable<WeatherModel> {
+            return RetrofitCreator.create(WeatherApiImpl::class.java).getWeatherList(query,"appid")
+        }
+    }
+}
+```
+
+### Creator 생성
+
+```kotlin
+class RetrofitCreator{
+    companion object {
+        val API_BASE_URL = "https://api.openweathermap.org/data/2.5/"
+
+        private fun defaultRetrofit() : Retrofit{
+            return Retrofit.Builder()
+                    .baseUrl(API_BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .client(createOKHttpClient())
+                    .build()
+        }
+
+        fun <T> create(service: Class<T>): T {
+            return defaultRetrofit().create(service)
+        }
+
+        private fun createOKHttpClient(): OkHttpClient{
+            val interceptor = HttpLoggingInterceptor()
+            if(BuildConfig.DEBUG){
+                interceptor.level = HttpLoggingInterceptor.Level.BODY
+            } else {
+                interceptor.level = HttpLoggingInterceptor.Level.NONE
+            }
+            return OkHttpClient.Builder()
+                    .addNetworkInterceptor(interceptor)
+                    .build()
+        }
+    }
+}
+```
+
+Retrofit을 호출하기 위한 Creator를 정의합니다.
+
+### API 호출
+
+```kotlin
+compositeDisposable = CompositeDisposable()
+
+        compositeDisposable.add(WeatherApi.getWeatherList(cityName)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(newThread())
+                .subscribe({response: WeatherModel ->
+                    testtext.append("name : ${response.name}\n")
+                    testtext.append("temp : ${response.main?.temp.toString()}\n")
+                    testtext.append("weather : ${response.weather.get(0).main}\n")
+                    testtext.append("description : ${response.weather.get(0).description}\n")
+                }, { error : Throwable ->
+                    Log.d("test",error.localizedMessage)
+                    testtext.text = error.localizedMessage
+                })
+        )
+```
+
+---
+
+## 이슈
+
+```
+communication to api.openweathermap.org not permitted by network security policy
+```
+
+가 뜬다면 API 호출 주소를 https 로 바꾸어야한다. 안드로이드 파이부터 바뀌어서 보안상 이렇게 해주어야 한다고 한다.
+
+```
+Expected BEGIN_ARRAY but was BEGIN_OBJECT at line 1 column 2 path 
+```
+
+Json 포멧이 제대로 안먹히는 경우이다 . 잘보니 json 포멧중에 [] 로 감싸 오는것만 List로 받을 수 있고 {} 안에 {} 가 있다면 그 자체로 받아야 한다.
+
 ---
 
 ## 출처
