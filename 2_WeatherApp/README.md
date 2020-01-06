@@ -7,8 +7,7 @@
 날씨 앱을 만들기 위해 필요한 레이아웃, 기능.
 
 1. RecyclerView : 도시 별 날씨를 보기 위해
-2. Adapter : 아이템을 RecyclerView에 추가하기 위해 
-3. 액티비티 전환
+3. 액티비티 전환(Anko라이브러리)
 4. 날씨 API 사용
 
 ---
@@ -45,7 +44,7 @@ implementation 'com.android.support:recyclerview-v7:26.1.0'
 도시별 날씨의 목록을 만들기 때문에, CityVO 클래스 파일을 만든다 항목은 다음과 같다.
 
 ```kotlin
-class CityVO (val name: String, val time: String, val weather: String, val temperature : String)
+class CityDTO (val name: String, val time: String, val weather: String, val temperature : String)
 ```
 
 ### (3) 레이아웃에 RecyClerView 추가
@@ -73,7 +72,7 @@ RecyclerView의 항목을 담당할 item View를 만든다.
 Recycler의 Adapter는 기본으로 RecyclerView.Adapter를 extend 해야한다. 하지만 이걸 쓰기 위해서는 ViewHolder가 필요한데 아직 없으므로 내부 클래스로 생성해준다.
 
 ```kotlin
-class MainRVAdapter(val context: Context, val cityList: ArrayList<CityVO>): RecyclerView.Adapter<MainRVAdapter.Holder>() {
+class MainRVAdapter(val context: Context, val cityList: ArrayList<CityDTO>): RecyclerView.Adapter<MainRVAdapter.Holder>() {
 
     //화면을 최초 로딩하여 만들어진 View가 없는 경우,xml 파일을 inflate하여 ViewHolder를 생성한다.
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): Holder{
@@ -97,8 +96,8 @@ class MainRVAdapter(val context: Context, val cityList: ArrayList<CityVO>): Recy
         val cityWeather = itemView?.findViewById<TextView>(R.id.cityWeatherTxt)
         val cityTemp = itemView?.findViewById<TextView>(R.id.cityTempTxt)
 
-        fun bind(city: CityVO, context: Context) {
-            /* dogPhoto의 setImageResource에 들어갈 이미지의 id를 파일명(String)으로 찾고, 이미지가 없는 경우 안드로이드 기본 아이콘을 표시한다.*/
+        fun bind(city: CityDTO, context: Context) {
+            /* setImageResource에 들어갈 이미지의 id를 파일명(String)으로 찾고, 이미지가 없는 경우 안드로이드 기본 아이콘을 표시한다.*/
             if (city.weather != "") {
                 val resourceId = context.resources.getIdentifier(city.weather, "drawable", context.packageName)
                 weatherImg?.setImageResource(resourceId)
@@ -120,7 +119,7 @@ class MainRVAdapter(val context: Context, val cityList: ArrayList<CityVO>): Recy
 ```kotlin
 class MainView : AppCompatActivity() {
 
-    var cityList = ArrayList<CityVO>(); //도시 저장용.
+    var cityList = ArrayList<CityDTO>(); //도시 저장용.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,6 +145,54 @@ val lm = LinearLayoutManager(this)
 mRecyclerView.layoutManager = lm
 mRecyclerView.setHasFixedSize(true)
 ```
+
+### (7)itemClick Listener
+
+RecyclerView에서는 ListView와 다르게 별도로 클릭리스너를 생성해주어야 한다. 이 처리는 Adapter에서 람다를 통해 설정해주었다. 코틀린에서도 람다는 사용이 가능하므로, CityDTO를 파라미터로 받아서 아무것도 반환하지 않는 파라미터를 람다식으로 나타낸다.
+
+```kotlin
+val itemClick : (CityDTO) -> Unit
+```
+
+Unit의 함수 자체를 itemClick 변수에 넣는다.  이제 itemClick 변수를 Adapter의 파라미터로 넣고, Adapter내에서 setOnClickListener 기능을 설정할 때 (CityDTO) -> Unit에 해당하는 함수 자체를 하나의 변수로 꺼내 쓸 수 있는 것이다.
+
+```kotlin
+class MainRVAdapter(val context: Context, val cityList: ArrayList<CityDTO>,val itemClick: (CityDTO) -> Unit): RecyclerView.Adapter<MainRVAdapter.Holder>() {
+    //(1)Adapter의 파라미터에 람다식 itemClick을 넣는다.
+    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): Holder{
+        val view = LayoutInflater.from(context).inflate(R.layout.main_recycler_item, parent, false)
+        return Holder(view,itemClick)
+        //(4) Holder의 파라미터가 하나 더 추가됐으니 여기도 파라미터 추가.
+    }
+    
+    ...
+    ...
+    ...
+    
+	inner class Holder(itemView: View?, itemClick:(CityDTO) -> Unit) : RecyclerView.ViewHolder(itemView) {
+	    //(2)Holder에서 클릭에 대한 처리를 하므로, Holder의 파라미터에 람다식 itemClick을 추가
+   		...
+    	...
+    	...
+    	cityTemp?.text = city.temperature
+        
+    	itemView.setOnClickListener{itemClick(city)}
+    	//(3)itemView가 클릭됐을 때 처리할 일을 itemClick으로 설정.
+        //(CityDTO) -> Unit 에 대한 함수는 나중에 Main에서 작성한다.
+    	}
+	}
+}
+```
+
+이 후 Adapter에서 itemClick에 대한 설정이 끝났으니 main에서 람다에 실행할 코드를 입력하면 마무리 된다! 일단 예제로 간단하게 Toast 메세지만 띄움
+
+```kotlin
+val mAdapter = MainRVAdapter(this,cityList){ city ->
+    toast(this,"이 도시의 이름은 ${city.name}이며, 현재 날씨는 ${city.weather}입니다.",Toast.LENGTH_LONG)
+}
+```
+
+자 여기까지 했으면 어느정도 View가 완성되었을 것이다! 다음은 Activity 전환이다!
 
 ---
 
