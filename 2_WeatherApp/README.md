@@ -194,6 +194,63 @@ val mAdapter = MainRVAdapter(this,cityList){ city ->
 
 자 여기까지 했으면 어느정도 View가 완성되었을 것이다! 다음은 Activity 전환이다!
 
+## 2. 액티비티 전환
+
+### Anko 라이브러리란?
+
+- Intent, Dialog 등을 편하게 사용 가능하게 하는 라이브러리로 다양하게 큰 도움을 준다.
+
+### 사용 전 설정
+
+1. AnKo라이브러리 추가.
+
+   ```kotlin
+   dependencies{implementation "org.jetbrains.anko:anko:$anko_version"}
+   ```
+
+2. 프로젝트 수준의 gradle 파일 수정
+
+   ```kotlin
+   buildscript{ ext.anko_version = '0.10.5'}
+   ```
+
+### 액티비티 이동
+
+Anko 사용 전
+
+```kotlin
+val intent = Intent(this,FindActivity::class.java)
+intent.putExtra("weight",180)
+intent.putExtra("height",70)
+startActivity(intent)
+```
+
+Anko 사용 후
+
+```kotlin
+startActivity<FindActivity>("weight" to 100, "height" to 70)
+```
+
+이렇게 한 줄로 코드를 줄일 수 있다! 전달 받는 방법 또한 매우 간단하다!
+
+```kotlin
+val height = intent.getIntExtra("height",0)
+val weight = intent.getIntExtra("weight",0)
+```
+
+여기서 갑자기 나오는 intent는 코틀린에서 알아서 처리해준다. 아주 개꿀이다.
+
+이후 추가로 Manifest.xml에 추가하면 좋은 기능이다.
+
+```xml
+<activity
+	android:name=".FindActivity"
+	android:parentActivityName=".MainActivity">
+</activity>
+```
+
+//// 추가로 Toast 위젯또한 toast("~~~") 면 끝난다. 개꿀이 아닐 수 없다.
+
 ---
 
 ## 출처
@@ -201,3 +258,5 @@ val mAdapter = MainRVAdapter(this,cityList){ city ->
 [ListView](https://blog.yena.io/studynote/2017/12/01/Android-Kotlin-ListView.html)
 
 [RecyclerView](https://blog.yena.io/studynote/2017/12/06/Android-Kotlin-RecyclerView1.html)
+
+[액티비티전환](https://shacoding.com/2019/08/15/android-anko-라이브러리로-액티비티-이동-쉽게-하기-with-코틀린/)
