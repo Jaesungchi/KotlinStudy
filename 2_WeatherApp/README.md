@@ -9,6 +9,7 @@
 1. RecyclerView : 도시 별 날씨를 보기 위해
 3. 액티비티 전환(Anko라이브러리)
 4. 날씨 API 사용
+4. RecyclerView 제스쳐 기능
 
 ---
 
@@ -362,6 +363,113 @@ compositeDisposable = CompositeDisposable()
         )
 ```
 
+## 4. RecyclerView 제스쳐 기능
+
+현재 기능에는 삭제나 리스트 순서 변경이 없기 때문에 Recycler의 제스쳐 기능을 통해 위치를 바꿀 수 있게 한다. 이번에는 2가지 기능을 넣을 예정이다.
+
+- Drag & Drop : 순서 변경
+- Swipe to Dismiss : 옆으로 밀면 아이템 삭제
+
+### ItemTouchHelper
+
+이것은 RecyclerView.ItemDecoration의 서브 클래스로 RecyclerView 및 Callback 클래스와 함께 동작한다. 사용자가 위의 액션을 수행할때 이벤트를 수신한다. 이제 우리가 원하는 기능에 따라 메소드를 재정의 해서 사용하면 된다.
+
+ItemTouchHelper.Callback은 추상 클래스로 추상 메소드인 getMovementFlags(), onMove(), onSwipe()를 필수로 재정의해서 사용한다. 아니면 Wrapper 클래스인 ItemTouchHelper.SimpleCallback을 이용해도 된다.
+
+일단 사용자가 Drag 액션을 시작하면 itemTouchHelper에 이벤트를 전달할 DragListener를 만든다. 그리고 아이템이 Drag & Drop이나 Swiped 됐을 때 어댑터에 이벤트를 전달할 ActionListener를 만든다.
+
+```kotlin
+interface ItemActionListener{
+    fun onItemMoved(from: Int, to: Int)
+    fun onItemSwiped(position: Int)
+}
+interface ItemDragListener{
+    fun onStartDrag(viewHolder: RecyclerView.ViewHolder)
+}
+
+```
+
+이제 MainRVAdapter를 수정한다.
+
+```kotlin
+class MainRVAdapter(val context: Context, val cityList: ArrayList<CityModel>, val itemClick:(CityModel)->Unit, val listener: ItemDragListener): RecyclerView.Adapter<MainRVAdapter.Holder>(), ItemActionListener {
+    
+    override fun onItemSwiped(position: Int) {
+        cityList.removeAt(position)
+        notifyItemRemoved(position) //지운것을 알린다.
+    }
+
+    override fun onItemMoved(from: Int, to: Int) {
+        if(from == to) return
+        val fromCity = cityList.removeAt(from) //지운뒤
+        cityList.add(to,fromCity) //자리에 옮긴다
+        notifyItemMoved(from,to) //바뀐것을 알린다.
+    }
+    ...
+    ...
+}
+```
+
+다음은 내부 클래스로 선언한 Holder에 드래그 핸들을 통한 아이템 이동을 위해 , 드래스 핸들 뷰에 터치 리스너를 달아 준다.
+
+```kotlin
+inner class Holder(itemView: View,itemClick: (CityModel) -> Unit,listener: ItemDragListener) : RecyclerView.ViewHolder(itemView) {
+    init{
+        itemView.setOnTouchListener{ v,event->
+           if(event.action == MotionEvent.ACTION_DOWN){
+                listener.onStartDrag(this)
+            }
+            false
+        }
+    }
+    ...
+    ...
+}
+```
+
+이제 거의 다 왔다. ItemTouchHelper.Callback을 상속받는 클래스를 만든다. 파라미터로 ItemActionListener를 받는다.
+
+1. getMovementFlags()를 재정의해 Drag 및 Swipe 이벤트의 방향을 지정한다.
+2. 아이템이 Drag 되면 이 클래스는 onMove()를 호출한다. 이때 ItemActionListener로 어댑터에 fromPosition과 toPosition을 파라미터와 함께 콜백을 전달한다.
+3. Swipe되면 ItemTouchHelper가 범위를 벗어날 때까지 애니매이션을 적용한 후, onSwipe()를 호출한다. 이때 ItemActionListener로 어댑터에 제거할 아이템의 Postion을 파라미터와 함께 콜백을 전달한다.
+
+```kotlin
+class ItemTouchHelperCallback(val listener:ItemActionListener) : ItemTouchHelper.Callback(){
+    override fun getMovementFlags(p0: RecyclerView, p1: RecyclerView.ViewHolder): Int {
+        val dragFlags = ItemTouchHelper.DOWN or ItemTouchHelper.UP
+        val swipeFalgs = ItemTouchHelper.START or ItemTouchHelper.END
+        return makeMovementFlags(dragFlags,swipeFalgs)
+    }
+
+    override fun onMove(p0: RecyclerView, p1: RecyclerView.ViewHolder, p2: RecyclerView.ViewHolder): Boolean {
+        listener.onItemMoved(p1.adapterPosition,p2.adapterPosition)
+        return true
+    }
+
+    override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
+        listener.onItemSwiped(p0.adapterPosition)
+    }
+}
+```
+
+마지막으로 MainActivity에서 인터페이스를 구현한다.
+
+```kotlin
+class MainActivity : AppCompatActivity(), ItemDragListener{
+	override fun onCreate(savedInstanceState: Bundle?){
+		...
+		...
+		itemTouchHelper = ItemTouchHelper(ItemTouchHelperCallback(mAdapter))
+        itemTouchHelper!!.attachToRecyclerView(mRecyclerView)
+	}
+	override fun onStartDrag(viewHolder: RecyclerView.ViewHolder){
+		itemTouchHelper.startDrag(viewHolder)
+	}
+}
+```
+
+여기까지 하니 드래그는 되는데 터치랑 스와이프가 안먹힌다!!
+
 ---
 
 ## 이슈
@@ -387,3 +495,5 @@ Json 포멧이 제대로 안먹히는 경우이다 . 잘보니 json 포멧중에
 [RecyclerView](https://blog.yena.io/studynote/2017/12/06/Android-Kotlin-RecyclerView1.html)
 
 [액티비티전환](https://shacoding.com/2019/08/15/android-anko-라이브러리로-액티비티-이동-쉽게-하기-with-코틀린/)
+
+[RecyclerView 제스쳐](http://dudmy.net/android/2018/05/02/drag-and-swipe-recyclerview/)
