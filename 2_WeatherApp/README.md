@@ -4,12 +4,15 @@
 
 날씨 앱을 만들기 위한 코틀린 공부 정리
 
-날씨 앱을 만들기 위해 필요한 레이아웃, 기능.
+날씨 앱을 만들기 위해 필요한 기능.
 
 1. RecyclerView : 도시 별 날씨를 보기 위해
 3. 액티비티 전환(Anko라이브러리)
 4. 날씨 API 사용
 4. RecyclerView 제스쳐 기능
+5. ActionBar 버튼 추가
+6. 날씨 불러올때 로딩
+7. 도시 검색 및 추가
 
 ---
 
@@ -468,7 +471,22 @@ class MainActivity : AppCompatActivity(), ItemDragListener{
 }
 ```
 
-여기까지 하니 드래그는 되는데 터치랑 스와이프가 안먹힌다!!
+여기까지 하니 드래그는 되는데 터치랑 스와이프가 안먹힌다!! 
+
+Holder에 TouchListener로 되어있으니 누구보다 제일 빠른 순위로 Drag & Drop이 먹히는 것 같다.이것을 LongClickListener로 바꾸어 준다! 해결!**(Kotlin으로 이런 예제가 없어서 애먹음)**
+
+```kotlin
+itemView.setOnLongClickListener{ I ->
+    listener.onStartDrag(this)
+    false
+}
+```
+
+## 5. ActionBar 버튼 추가
+
+이제 도시를 내 맘대로 넣을 수 있게 ActionBar에 추가 버튼을 넣어서 도시를 추가하는 Activity로 이동시키는 기능을 만들자. 일단 xml을 하나 만든다.
+
+
 
 ---
 
