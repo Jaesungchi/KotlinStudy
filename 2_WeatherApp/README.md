@@ -10,9 +10,10 @@
 3. 액티비티 전환(Anko라이브러리)
 4. 날씨 API 사용
 4. RecyclerView 제스쳐 기능
-5. ActionBar 버튼 추가
-6. 날씨 불러올때 로딩
-7. 도시 검색 및 추가
+5. Splash이미지 적용
+6. ActionBar 버튼 추가
+7. 날씨 불러올때 로딩
+8. 도시 검색 및 추가
 
 ---
 
@@ -482,7 +483,46 @@ itemView.setOnLongClickListener{ I ->
 }
 ```
 
-## 5. ActionBar 버튼 추가
+## 5. Splash이미지 적용
+
+아주 간단하게 image를 만들어 drawable에 넣은 후 코딩 작업을 해준다.
+
+먼저 SplashActivity를 만든다.
+
+```kotlin
+class SplashActivity : AppCompatActivity(){
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.splash_layout)
+
+        startLoading()
+    }
+
+    private fun startLoading(){
+        val handler = Handler()
+        handler.postDelayed(Runnable{
+            val intent = Intent(this,MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        },2000)
+    }
+}
+```
+
+이후 Manifest에 작업을 해준다!
+
+```xml
+<activity android:name=".SplashActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+    </intent-filter>
+</activity>
+```
+
+이때 MainActivity의 intent 필터는 전부 지워야한다!
+
+## 6. ActionBar 버튼 추가
 
 이제 도시를 내 맘대로 넣을 수 있게 ActionBar에 추가 버튼을 넣어서 도시를 추가하는 Activity로 이동시키는 기능을 만들자. 일단 xml을 하나 만든다.
 
