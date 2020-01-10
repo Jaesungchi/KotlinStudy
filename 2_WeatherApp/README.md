@@ -524,7 +524,19 @@ class SplashActivity : AppCompatActivity(){
 
 ## 6. ActionBar 버튼 추가
 
-이제 도시를 내 맘대로 넣을 수 있게 ActionBar에 추가 버튼을 넣어서 도시를 추가하는 Activity로 이동시키는 기능을 만들자. 일단 xml을 하나 만든다.
+이제 도시를 내 맘대로 넣을 수 있게 ActionBar에 추가 버튼을 넣어서 도시를 추가하는 Activity로 이동시키는 기능을 만들자. 기존 액션바를 안보이게 하고 새로 추가하기 위해 Style을 바꿔준다.
+
+```xml
+<style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/colorAccent</item>
+</style>
+```
+
+이후 원하는 레이아웃에 추가한다!
+
+이미지 버튼에 이미지는 src  에 넣어야 한다!
 
 
 
