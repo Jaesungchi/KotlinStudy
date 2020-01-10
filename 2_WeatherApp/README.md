@@ -538,6 +538,29 @@ class SplashActivity : AppCompatActivity(){
 
 이미지 버튼에 이미지는 src  에 넣어야 한다!
 
+## 7. 날시 불러올때 로딩
+
+날씨를 API를 이용해서 불러오기 때문에 로딩에 시간이 걸린다. 따라서 로딩 이미지를 넣어주어 기다리는 시간을 지루하지 않게 해준다.
+
+간단하게 메소드 2개를 추가하면 안드로이드 기본 로딩을 사용할 수 있다.
+
+```kotlin
+private fun loading() {
+    //로딩
+    android.os.Handler().postDelayed(
+           {
+                progressDialog = ProgressDialog(this)
+                progressDialog!!.isIndeterminate = true
+                progressDialog!!.setMessage("잠시만 기다려 주세요")
+                progressDialog!!.show()
+            }, 0)
+}
+private fun loadingEnd() {
+    android.os.Handler().postDelayed(
+            { progressDialog!!.dismiss() }, 0)
+}
+```
+
 
 
 ---
