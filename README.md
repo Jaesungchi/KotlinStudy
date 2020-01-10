@@ -5,6 +5,7 @@
 안드로이드 개발자로서 더욱 더 성장하기 위해 Kotlin 언어 공부를 시작합니다.
 
 1. 계산기
+2. [날씨앱](https://github.com/Jaesungchi/KotlinStudy/tree/master/2_WeatherApp)
 
 
 ## 왜? 코틀린?
