@@ -561,6 +561,60 @@ private fun loadingEnd() {
 }
 ```
 
+## 8. 도시 검색 및 추가
+
+도시를 실시간으로 검색하기 위해서 RealmSearchView를 이용할 예정이다.
+
+RealmSearchView를 이용하기 전 gradle에 jitpack.io를 추가하여 적용하자.
+
+```xml
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+```
+
+그리고 앱단 gradle에도 추가한다.
+
+```xml
+implementation 'com.github.thorbenprimke:realm-searchview:0.9.1'
+```
+
+이후 search_layout을 만들어 밑의 레이아웃을 추가한다.
+
+```xml
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="11"
+        android:layout_marginTop="10dp">
+
+        <co.moonmonkeylabs.realmsearchview.RealmSearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:rsvHint="@string/search_hint"
+            />
+</FrameLayout>
+```
+
+이제 아이템을 bind 하기 위해 편리한 기능인 ButterKnife를 사용해보자. 먼저 프로젝트 단 gradle에 아래 내용을 추가한다.
+
+```xml
+classpath 'com.jakewharton:butterknife-gradle-plugin:10.2.1'
+```
+
+그리고 app단 gradle 에도 아래 내용을 추가하고 sync 한다.
+
+```xml
+implementation 'com.jakewharton:butterknife:10.2.1'
+annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
+```
+
 
 
 ---
@@ -573,11 +627,54 @@ communication to api.openweathermap.org not permitted by network security policy
 
 가 뜬다면 API 호출 주소를 https 로 바꾸어야한다. 안드로이드 파이부터 바뀌어서 보안상 이렇게 해주어야 한다고 한다.
 
+---
+
 ```
 Expected BEGIN_ARRAY but was BEGIN_OBJECT at line 1 column 2 path 
 ```
 
 Json 포멧이 제대로 안먹히는 경우이다 . 잘보니 json 포멧중에 [] 로 감싸 오는것만 List로 받을 수 있고 {} 안에 {} 가 있다면 그 자체로 받아야 한다.
+
+---
+
+```text
+Annotation processors must be explicitly declared now. The following dependencies on the compile classpath are found to contain annotation processor. Please add them to the annotationProcessor configuration.
+```
+
+RealmSearchView를 Gradle에 Synk 후에 빌드하니 이런 에러가 떴다.
+
+annotation processeor로 써야한다는 말로써 implement 밑에 
+
+```
+annotationProcessor 'com.github.thorbenprimke:realm-searchview:0.9.1'
+```
+
+를 추가하니 에러가 사라졌다.
+
+---
+
+```
+Manifest merger failed : Attribute application@appComponentFactory value=(android.support.v4.app.CoreComponentFactory) from [com.android.support:support-compat:28.0.0] AndroidManifest.xml:22:18-91
+	is also present at [androidx.core:core:1.0.0] AndroidManifest.xml:22:18-86 value=(androidx.core.app.CoreComponentFactory).
+	Suggestion: add 'tools:replace="android:appComponentFactory"' to <application> element at AndroidManifest.xml:5:5-24:19 to override.
+```
+
+아마 Gradle 업데이트 하니 에러가 생긴듯. Android X로 패키지명을 바꿔야 함. 
+
+manifests application에 아래 내용을 추가한다.
+
+```xml
+tools:replace="android:appComponentFactory"
+android:appComponentFactory="whateverString"
+```
+
+---
+
+```
+Unresolved reference: R
+```
+
+이 에러는 갑자기 뜨기 시작했다...
 
 ---
 
@@ -590,3 +687,5 @@ Json 포멧이 제대로 안먹히는 경우이다 . 잘보니 json 포멧중에
 [액티비티전환](https://shacoding.com/2019/08/15/android-anko-라이브러리로-액티비티-이동-쉽게-하기-with-코틀린/)
 
 [RecyclerView 제스쳐](http://dudmy.net/android/2018/05/02/drag-and-swipe-recyclerview/)
+
+[RealmSearchView](https://academy.realm.io/kr/posts/android-search-text-view/)
