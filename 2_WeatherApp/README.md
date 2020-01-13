@@ -576,6 +576,12 @@ allprojects {
 }
 ```
 
+그리고 dependencies에도 아래 내용을 추가한다.
+
+```
+classpath "io.realm:realm-gradle-plugin:0.88.2"
+```
+
 그리고 앱단 gradle에도 추가한다.
 
 ```xml
@@ -601,6 +607,61 @@ implementation 'com.github.thorbenprimke:realm-searchview:0.9.1'
             />
 </FrameLayout>
 ```
+
+Realm의 기본적인 모델의 모양은 다음과 같다.
+
+```kotlin
+public open class 이름 : RealmObject(){
+    public open var name : String? = null
+}
+```
+
+코틀린은 기본이 final 이고 open 키워드로 개방해야 한다.
+
+우리는 도시 검색을 하기 위해 만들기 때문에 모델은 간단하게 만든다.
+
+```kotlin
+open class City : RealmObject(){
+    open var name : String? = null
+}
+```
+
+그리고 Adapter를 만든다.
+
+```kotlin
+class CityRVAdpater(val context: Context, val realm: Realm, val filterName : String) : RealmSearchAdapter<City, CityRVAdpater.ViewHolder>(context,realm,filterName) {
+    override fun convertViewHolder(viewHolder: RealmViewHolder?): ViewHolder {
+        return viewHolder as ViewHolder   
+    }
+
+    override fun onBindRealmViewHolder(viewHolder: ViewHolder?, position: Int) {
+        val mcity : City = realmResults.get(position)
+        viewHolder?.bind(mcity)
+    }
+
+    override fun onCreateRealmViewHolder(viewGroup: ViewGroup?, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(context).inflate(R.layout.search_layout, viewGroup, false)
+        return ViewHolder(view)
+    }
+
+    inner class ViewHolder(itemView : View) : RealmViewHolder(itemView){
+        init{
+            itemView.setOnClickListener{ I ->
+                //여기에 할 일 추가.
+                false
+            }
+        }
+
+        val cityImg = itemView?.findViewById<ImageView>(R.id.cityImg)
+        val cityName = itemView?.findViewById<TextView>(R.id.cityName)
+        fun bind(city: City) {
+            cityName?.text = city.name
+        }
+    }
+}
+```
+
+
 
 이제 아이템을 bind 하기 위해 편리한 기능인 ButterKnife를 사용해보자. 먼저 프로젝트 단 gradle에 아래 내용을 추가한다.
 
@@ -674,7 +735,59 @@ android:appComponentFactory="whateverString"
 Unresolved reference: R
 ```
 
-이 에러는 갑자기 뜨기 시작했다...
+이 에러는 갑자기 뜨기 시작했다... Gradle의 업데이트 문제인것 같아 전으로 초기화해서 살렸다.
+
+---
+
+```
+java.lang.RuntimeException: Unable to start activity ComponentInfo{com.kotlin.jaesungchi.weatherapp/com.kotlin.jaesungchi.weatherapp.SearchActivity}: java.lang.IllegalArgumentException: City is not part of the schema for this Realm
+```
+
+realm.copyToRealm 에서 에러가 발생했다.
+
+app 단 Gradle에 아래 내용을 추가해준다.
+
+```
+apply plugin: 'kotlin-kapt'
+apply plugin: 'realm-android'
+
+android {
+	buildToolsVersion "27.0.3"
+	...
+}
+```
+
+그랬더니 아래 에러가 뜬다.
+
+```
+e: error: A default public constructor with no argument must be declared if a custom constructor is declared.
+```
+
+이 에러는 Object의 Error이다 . object를 바꿔준다.
+
+```kotlin
+data class City(var name : String) : RealmObject() //에서
+//아래로 바꿔준다.
+open class City(var name: String?= null) : RealmObject()
+```
+
+또 에러가 뜬다.
+
+```
+More than one file was found with OS independent path 'lib/armeabi/librealm-jni.so'
+```
+
+app 단의 Gradle의 android에 아래 내용을 추가한다.
+
+```
+packagingOptions {
+    pickFirst 'lib/armeabi/*'
+}
+```
+
+위와 같은 에러는 다 pickFirst로 추가해준다.
+
+그래도 더 에러가 심해진다 ...
 
 ---
 
