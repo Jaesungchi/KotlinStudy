@@ -563,7 +563,7 @@ private fun loadingEnd() {
 
 ## 8. 도시 검색 및 추가
 
-기존 RealmSearchView 제작 해둔 것을 직접 만들어 내는 것이 나을 것 같아 다시 시작한다.
+원래 Realm에 데이터를 저장해서 꺼내 쓰려고 했으나 도시이름만 저장하기때문에 큰 의미가 없는 것 같아 직접 List에 넣기로 한다.
 
 ---
 
@@ -675,6 +675,32 @@ packagingOptions {
 위와 같은 에러는 다 pickFirst로 추가해준다.
 
 그래도 더 에러가 심해진다 ...
+
+---
+
+**Realm Gradle 세팅 하는법 **[realm Doc 바로가기](https://realm.io/kr/docs/java/latest/)
+
+1. Gradle 추가
+
+   ```
+   dependencies {
+       classpath "io.realm:realm-gradle-plugin:3.5.0"
+   } //Project 단계
+   ```
+
+   ```
+   apply plugin: 'kotlin-kapt'
+   apply plugin: 'realm-android'
+   //app 단계
+   ```
+
+2. DB 객체 생성
+
+   ```kotlin
+   open class City(@PrimaryKey var name: String?= null) : RealmObject()
+   ```
+
+   
 
 ---
 
