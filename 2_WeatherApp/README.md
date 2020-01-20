@@ -14,6 +14,7 @@
 6. ActionBar 버튼 추가
 7. 날씨 불러올때 로딩
 8. 도시 검색 및 추가
+9. 도시 리스트 저장 (sharedPreferences)
 
 ---
 
@@ -565,6 +566,58 @@ private fun loadingEnd() {
 
 원래 Realm에 데이터를 저장해서 꺼내 쓰려고 했으나 도시이름만 저장하기때문에 큰 의미가 없는 것 같아 직접 List에 넣기로 한다.
 
+일단 기존 1번 처럼SearchActivity에  RecyclerView를 생성하고 연결까지 해준다.
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.search_layout)
+    val mAdapter = SearchRVAdapter(this, cityList) { city ->
+        toast("good")
+    }
+    cityRecycler.adapter = mAdapter
+    val lm = LinearLayoutManager(this)
+    cityRecycler.layoutManager = lm
+    cityRecycler.setHasFixedSize(true)
+    search_back_btn.setOnClickListener { finish() }
+}
+```
+
+이후 editText에 변화 이벤트를 넣어준다.
+
+```kotlin
+val textWatcher = object : TextWatcher {
+    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        //텍스트 변경 전 동작
+    }
+     override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        //텍스트 변경 시 동작
+     }
+     override fun afterTextChanged(p0: Editable?) {
+        //텍스트가 변경된 이후 동작
+    }
+ }
+searchTxt.addTextChangedListener(textWatcher)
+```
+
+이후  afterTextChanged에 기능을 넣는다.
+
+```kotlin
+override fun afterTextChanged(p0: Editable?) {
+    val tmp0 = searchTxt.text.toString().toUpperCase()
+    var list : ArrayList<SearchModel> = arrayListOf<SearchModel>()
+    for( i in 0 .. cityList.size){
+        if(i >= cityList.size) break
+        val tmp1 = cityList[i].name.toUpperCase()
+        if(tmp1.contains(tmp0))
+        	list.add(cityList[i])
+    }
+    setAdapter(list)
+}
+```
+
+
+
 ---
 
 ## 이슈
@@ -700,7 +753,15 @@ packagingOptions {
    open class City(@PrimaryKey var name: String?= null) : RealmObject()
    ```
 
-   
+---
+
+키보드가 레이아웃을 방해하지 않게 하는법
+
+사용하는 acticity의 manifest에 아래 내용을 추가한다.
+
+```xml
+android:windowSoftInputMode="adjustNothing"
+```
 
 ---
 
