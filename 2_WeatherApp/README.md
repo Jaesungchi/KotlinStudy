@@ -616,7 +616,61 @@ override fun afterTextChanged(p0: Editable?) {
 }
 ```
 
+## 도시 리스트 저장 (sharedPreferences)
 
+SharedPreferences는 App에 포함되는 데이터 파일을 만들어서, 디바이스에 저장하는 방식이다. 형태는 (key/value) 형태로 관리한다.
+
+SharedPreferences 객체를 매 클래스 마다 만들어주면 매번 초기화를 해주는 것이 번거롭기 때문에 Add 클래스를만들어 object (static)화 시켜 어디서든 접근 할 수 있게 한다.
+
+```kotlin
+class App : Application(){
+    companion object {
+        lateinit var prefs : MySharedPreference
+    }
+
+    override fun onCreate() {
+        prefs = MySharedPreference(applicationContext)
+        super.onCreate()
+    }
+
+    inner class MySharedPreference(context : Context){
+        val PREF_FILENAME = "WeatherApp"
+        val prefs : SharedPreferences = context.getSharedPreferences(PREF_FILENAME,0)
+
+        fun getCityList() : ArrayList<CityModel>{
+            var cityList = arrayListOf<CityModel>()
+            for(i in 1..5){
+                var tmp = prefs.getString(i.toString(),"")
+                if(tmp == "") break //리스트에 아무것도 없다면 종료
+                cityList.add(CityModel(tmp,"1200","cloudy","20"))
+            }
+            return cityList
+        }
+
+        fun addCity(city : SearchModel){
+            for(i in 1..5)
+                if(prefs.getString(i.toString(),"") == "") {
+                    prefs.edit().putString(i.toString(), city.name).apply()
+                    break
+                }
+        }
+        
+        fun deleteCity(position : Int){
+            prefs.edit().remove(position.toString()).apply()
+            for(i in position..5) {
+                var tmp = prefs.getString(i.toString(),"")
+                if (tmp == "") continue
+                else {
+                    prefs.edit().putString((i - 1).toString(), tmp).apply()
+                    prefs.edit().remove(i.toString()).apply()
+                }
+            }
+        }
+    }
+}
+```
+
+일단 날씨 데이터를 임의로 넣어 확인해본다.
 
 ---
 
@@ -762,6 +816,16 @@ packagingOptions {
 ```xml
 android:windowSoftInputMode="adjustNothing"
 ```
+
+---
+
+```
+Attempt to invoke virtual method 'java.lang.String android.content.ComponentName.getClassName()' on a null object reference
+```
+
+SharedPreferences 객체에 this.getPreferences 할때 발생한 에러.
+
+this.의 Intent가 생기기도 전에 먼저 this를해서 null값이 들어온 경우 이다.
 
 ---
 
