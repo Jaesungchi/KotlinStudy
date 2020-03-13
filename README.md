@@ -5,7 +5,8 @@
 안드로이드 개발자로서 더욱 더 성장하기 위해 Kotlin 언어 공부를 시작합니다.
 
 1. 계산기
-2. [날씨앱](https://github.com/Jaesungchi/KotlinStudy/tree/master/2_WeatherApp)
+2. [Jetpack-Navigation-Example](https://github.com/Jaesungchi/Jetpack-Navigation-Example)
+3. [Jetpack-Room-Example](https://github.com/Jaesungchi/Jetpack-Room-Example)
 
 
 ## 왜? 코틀린?
