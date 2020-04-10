@@ -7,6 +7,8 @@
 1. 계산기
 2. [Jetpack-Navigation-Example](https://github.com/Jaesungchi/Jetpack-Navigation-Example)
 3. [Jetpack-Room-Example](https://github.com/Jaesungchi/Jetpack-Room-Example)
+4. [CustomView-Example](https://github.com/Jaesungchi/CustomView-Example)
+5. [Google_News_Reader](https://github.com/Jaesungchi/Google_News_Reader)
 
 
 ## 왜? 코틀린?
